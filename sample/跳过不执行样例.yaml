@@ -1,0 +1,60 @@
+- feature: 跳过功能测试
+  story: 用例跳过测试
+  title: 跳过执行的测试用例
+  skip: true  # 跳过此用例
+  request:
+    method: get
+    url: https://httpbin.org/get
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]
+
+- feature: 跳过功能测试
+  story: 用例跳过测试
+  title: 正常执行的测试用例
+  skip: false  # 明确不跳过
+  request:
+    method: get
+    url: https://httpbin.org/get
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]
+
+- feature: 跳过功能测试
+  story: 用例跳过测试
+  title: 默认执行的测试用例
+  request:
+    method: get
+    url: https://httpbin.org/get
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]
+
+- feature: 跳过功能测试
+  story: 条件跳过测试
+  title: 带延迟和重跑的跳过用例
+  skip: true  # 跳过此用例
+  delay: 2   # 延迟配置（会被跳过）
+  retry: 3   # 重跑配置（会被跳过）
+  request:
+    method: get
+    url: https://httpbin.org/get
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]

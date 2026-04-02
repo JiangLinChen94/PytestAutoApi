@@ -1,0 +1,9 @@
+.venv/
+.idea/
+__pycache__/
+.pytest_cache/
+allure-report/
+allure-results/
+configs/
+*.log
+.DS_Store

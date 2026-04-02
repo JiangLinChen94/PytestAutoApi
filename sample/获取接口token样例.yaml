@@ -1,0 +1,12 @@
+- feature: 账务中心
+  story: 登录
+  title: 登录成功
+  request:
+    method: post
+    url: https://acc-test.hnlshm.com/gateway/admin/user/login
+    params: null
+    json: { "appId": "sys_admin","endpoint": "pc","password": "818074a5d731e1788e6bea3df7b2f0dbaaa3ab9217259b805ef53a439acc1bf649a543828379809fab3a7d005bc73471b2111bf6ebfc55455b882f7883e9f455","userName": "18129970115"}
+    headers: null
+  extract:
+    token: [json, "$.data.token", 0]
+  validate: null

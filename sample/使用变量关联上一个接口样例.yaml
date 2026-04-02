@@ -1,0 +1,12 @@
+- feature: 账务中心-账户管理
+  story: 账户列表查询
+  title: 查询所有数据成功
+  request:
+    method: post
+    url: https://acc-test.hnlshm.com/gateway/std-account-client/std/account/page
+    params: null
+    json: { "belongBrand": '', "accBaseCode": '', "ownerSourceId": '', "baseBizCode": '', "ownerType": '',
+            "status": '', "pageNum": 1, "pageSize": 10 }
+    headers: { "Content-type": "application/json","Authorization": "Bearer ${token}" }
+  extract: null
+  validate: null

@@ -1,0 +1,43 @@
+- feature: 延迟功能测试
+  story: 延迟执行测试
+  title: 延迟5秒测试用例
+  delay: 5  # 延迟5秒
+  request:
+    method: get
+    url: https://httpbin.org/get
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]
+
+- feature: 延迟功能测试
+  story: 延迟执行测试
+  title: 无延迟测试用例
+  delay: 0  # 无延迟
+  request:
+    method: get
+    url: https://httpbin.org/get
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]
+
+- feature: 延迟功能测试
+  story: 延迟执行测试
+  title: 默认无延迟测试用例
+  request:
+    method: get
+    url: https://httpbin.org/get
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]

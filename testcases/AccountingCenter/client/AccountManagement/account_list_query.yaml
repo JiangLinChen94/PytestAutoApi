@@ -1,0 +1,32 @@
+- feature: 账务中心-账户管理
+  story: 账户列表查询
+  title: 查询所有数据成功
+  request:
+    method: post
+    url: ${get_env()}gateway/std-account-client/std/account/page
+    params: null
+    json: { "belongBrand": '', "accBaseCode": '', "ownerSourceId": '', "baseBizCode": '', "ownerType": '',
+            "status": '', "pageNum": 1, "pageSize": 10 }
+    headers: { "Content-type": "application/json","Authorization": "Bearer ${read_extract(token)}" }
+  extract:
+    belongBrand: [ json, "$.data[0].belongBrand", 0 ]
+    accBaseCode: [ json, "$.data[0].accBaseCode", 0 ]
+    ownerSourceId: [ json, "$.data[0].ownerSourceId", 0 ]
+    baseBizCode: [ json, "$.data[0].baseBizCode", 0 ]
+    ownerType: [ json, "$.data[0].ownerType", 0 ]
+    status: [ json, "$.data[0].status", 0 ]
+  validate:
+    equals:
+      断言状态为true: [ "True", "success" ]
+    contains:
+      断言响应内容包括belongBrand: [ "belongBrand", "text" ]
+      断言响应内容包括accBaseCode: [ "accBaseCode", "text" ]
+      断言响应内容包括ownerSourceId: [ "ownerSourceId", "text" ]
+      断言响应内容包括baseBizCode: [ "baseBizCode", "text" ]
+      断言响应内容包括ownerType: [ "ownerType", "text" ]
+      断言响应内容包括status: [ "status", "text" ]
+  parametrize:
+
+
+
+

@@ -1,0 +1,58 @@
+- feature: 重跑功能测试
+  story: 失败重跑测试
+  title: 重跑3次测试用例
+  retry: 3  # 重跑3次
+  request:
+    method: get
+    url: https://httpbin.org/status/500  # 模拟服务器错误
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]  # 这个断言会失败
+
+- feature: 重跑功能测试
+  story: 失败重跑测试
+  title: 重跑2次测试用例
+  retry: 2  # 重跑2次
+  request:
+    method: get
+    url: https://httpbin.org/status/404  # 模拟404错误
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]  # 这个断言会失败
+
+- feature: 重跑功能测试
+  story: 失败重跑测试
+  title: 无重跑测试用例
+  retry: 0  # 无重跑
+  request:
+    method: get
+    url: https://httpbin.org/status/500
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]
+
+- feature: 重跑功能测试
+  story: 失败重跑测试
+  title: 默认无重跑测试用例
+  request:
+    method: get
+    url: https://httpbin.org/status/500
+    params: null
+    json: null
+    headers: null
+  extract: null
+  validate:
+    equals:
+      断言状态码为200: [ "200", "status_code" ]

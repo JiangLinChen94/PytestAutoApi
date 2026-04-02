@@ -1,0 +1,22 @@
+- feature: 账务中心-账户管理
+  story: 账户列表查询
+  title: '$ddt{title}'
+  request:
+    method: post
+    url: ${get_env()}gateway/std-account-client/std/account/page
+    params: null
+    json: { "belongBrand": '$ddt{belongBrand}', "accBaseCode": '$ddt{accBaseCode}', "ownerSourceId": '$ddt{ownerSourceId}', "baseBizCode": '$ddt{baseBizCode}', "ownerType": '$ddt{ownerType}',
+            "status": '$ddt{status}', "pageNum": 1, "pageSize": 10 }
+    headers: { "Content-type": "application/json","Authorization": "Bearer ${read_extract(token)}" }
+  extract: null
+  validate:
+    equals:
+      断言状态为true: [ "True", "success" ]
+    contains:
+      断言响应内容包括accBaseCode: [ "$ddt{assert_accBaseCode}", "text" ]
+  parametrize:
+    - [ title,belongBrand,accBaseCode,ownerSourceId,baseBizCode,ownerType,status,assert_accBaseCode ]
+    - [ "查询所有数据成功","","","","","","","accBaseCode" ]
+    - [ "根据品牌查询数据成功","LSHM","","","","","","LSHM" ]
+
+

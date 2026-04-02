@@ -1,0 +1,17 @@
+# 业务流程用例：账户完整业务流程
+# 这种格式支持跨文件的用例组合
+
+scene_name: 账户完整业务流程
+desc: 登录 → 查询账户 → 禁用账户
+cases:
+  - case: login.yaml        # 第一步：登录
+    desc: 用户登录获取token
+    
+  - case: account_list_query.yaml # 第二步：查询账户
+    desc: 查询账户列表并提取账户信息
+    
+# 可选配置
+config:
+  continue_on_failure: false  # 某个步骤失败时是否继续执行后续步骤
+  timeout: 300                # 整个流程的超时时间（秒）
+  retry_count: 1              # 流程失败时的重试次数
