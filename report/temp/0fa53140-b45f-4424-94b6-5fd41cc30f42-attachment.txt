@@ -1,4 +1,0 @@
-INFO     D:\Script\PytestAutoApi\logs\info-2026-04-09.log:case_control.py:25 接口信息：账务中心-账户管理 >> 账户列表查询 >> 根据状态查询数据成功
-INFO     D:\Script\PytestAutoApi\logs\info-2026-04-09.log:request_control.py:42 请求成功: post https://acc-test.hnlshm.com/gateway/std-account-client/std/account/page
-INFO     D:\Script\PytestAutoApi\logs\info-2026-04-09.log:request_control.py:43 响应状态码: 200
-INFO     D:\Script\PytestAutoApi\logs\info-2026-04-09.log:request_control.py:44 响应时间: 194ms

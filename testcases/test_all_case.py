@@ -10,10 +10,10 @@ from pathlib import Path
 
 # 添加项目根目录到Python路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.helper_tools.model_control import verify_yaml
-from utils.requests_tools.case_control import use_case_execution
-from utils.helper_tools.ddt_control import read_testcase
-from utils.helper_tools.business_flow_control import BusinessFlowControl
+from utils.other_tools.model_control import verify_yaml
+from utils.case_tools.case_control import use_case_execution
+from utils.case_tools.ddt_control import read_testcase
+from utils.case_tools.business_flow_control import BusinessFlowControl
 
 
 class TestAllCase:

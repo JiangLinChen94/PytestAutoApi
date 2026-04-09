@@ -10,7 +10,7 @@ from logging import handlers
 from typing import Text
 import colorlog
 import time
-from common.setting import ensure_path_sep
+from utils.common_tools.common_control import ensure_path_sep
 
 
 class LogHandler:
