@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time   : 2026/3/25 18:43
+# @Time   : 2026/3/26 15:12
 # @Author : alin
 import requests
-from utils.helper_tools.log_control import logger
+import time
+from utils.logging_tools.log_control import INFO, ERROR
 from configs import setting
 
 
@@ -28,8 +29,19 @@ class RequestsControl:
                     value[file_key] = open(file_value, "rb")
 
         try:
+            # 记录请求开始时间
+            start_time = time.time()
+            
             # 发送请求
             response = RequestsControl.sess.request(**kwargs)
+            
+            # 计算响应时间
+            res_time = int((time.time() - start_time) * 1000)  # 毫秒
+            
+            # 记录请求成功信息
+            INFO.logger.info(f"请求成功: {kwargs.get('method', 'GET')} {kwargs.get('url', 'Unknown URL')}")
+            INFO.logger.info(f"响应状态码: {response.status_code}")
+            INFO.logger.info(f"响应时间: {res_time}ms")
 
             # 检查响应状态码，判断是否失败
             if response.status_code >= 400:
@@ -40,12 +52,12 @@ class RequestsControl:
 
         except requests.exceptions.RequestException as e:
             # 请求异常时记录详细的错误信息
-            logger.error(f"请求发送失败: {str(e)}")
+            ERROR.logger.error(f"请求发送失败: {str(e)}")
             self._log_failed_request(kwargs, None, str(e))
             raise
         except Exception as e:
             # 其他异常
-            logger.error(f"请求处理过程中发生未知错误: {str(e)}")
+            ERROR.logger.error(f"请求处理过程中发生未知错误: {str(e)}")
             self._log_failed_request(kwargs, None, str(e))
             raise
 
@@ -56,33 +68,33 @@ class RequestsControl:
         :param response: 响应对象
         :param error_msg: 错误信息
         """
-        logger.error("接口请求失败，详细信息如下：")
+        ERROR.logger.error("接口请求失败，详细信息如下：")
 
         # 记录请求信息
-        logger.error("请求信息：")
+        ERROR.logger.error("请求信息：")
         for key, value in request_kwargs.items():
             # 敏感信息处理（如密码、token等）
             if key in ['json', 'data'] and isinstance(value, dict):
                 # 创建敏感信息过滤后的副本
                 filtered_value = self._filter_sensitive_info(value)
-                logger.error(f"   {key}: {filtered_value}")
+                ERROR.logger.error(f"   {key}: {filtered_value}")
             elif key == 'headers' and isinstance(value, dict):
                 # 过滤敏感头信息
                 filtered_headers = self._filter_sensitive_headers(value)
-                logger.error(f"   {key}: {filtered_headers}")
+                ERROR.logger.error(f"   {key}: {filtered_headers}")
             else:
-                logger.error(f"   {key}: {value}")
+                ERROR.logger.error(f"   {key}: {value}")
 
         # 记录响应信息（如果有）
         if response is not None:
-            logger.error("响应信息：")
-            logger.error(f"状态码: {response.status_code}")
-            logger.error(f"响应头: {dict(response.headers)}")
-            logger.error(f"响应内容: {response.text}")
+            ERROR.logger.error("响应信息：")
+            ERROR.logger.error(f"状态码: {response.status_code}")
+            ERROR.logger.error(f"响应头: {dict(response.headers)}")
+            ERROR.logger.error(f"响应内容: {response.text}")
 
         # 记录错误信息（如果有）
         if error_msg:
-            logger.error(f"错误信息: {error_msg}")
+            ERROR.logger.error(f"错误信息: {error_msg}")
 
     def _filter_sensitive_info(self, data):
         """

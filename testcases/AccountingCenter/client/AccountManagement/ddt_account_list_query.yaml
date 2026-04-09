@@ -16,7 +16,8 @@
        响应内容包含的数据: [ "$ddt{assert_accBaseCode}", "text" ]
    parametrize:
      - [ title,belongBrand,accBaseCode,ownerSourceId,baseBizCode,ownerType,status,assert_accBaseCode ]
-     - [ "根据品牌查询数据成功","LSHM","","","","","","LSHM" ]
+     - [ "根据品牌LSHM查询数据成功","LSHM","","","","","","LSHM" ]
+     - [ "根据品牌ZYM查询数据成功","ZYM","","","","","","ZYM" ]
      - [ "根据账户名称查询数据成功","","${accBaseCode}","","","","","${accBaseCode}" ]
      - [ "根据支付侧主商编查询数据成功","","","${ownerSourceId}","","","","${ownerSourceId}" ]
      - [ "根据主体代码查询数据成功","","","","${baseBizCode}","","","${baseBizCode}" ]

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time   : 2026/4/1 14:19
+# @Time   : 2026/3/26 14:40
 # @Author : alin
-from utils.helper_tools.log_control import logger
+import time
+from utils.logging_tools.log_control import INFO, WARNING
 
 
 class DelayControl:
@@ -18,19 +19,18 @@ class DelayControl:
         :param case_title: 用例标题，用于日志记录
         """
         if delay_seconds and delay_seconds > 0:
-            import time
-            logger.info(f"用例 '{case_title}' 开始延迟 {delay_seconds} 秒...")
+            INFO.logger.info(f"用例 '{case_title}' 开始延迟 {delay_seconds} 秒...")
 
             # 显示延迟进度
             for remaining in range(delay_seconds, 0, -1):
-                logger.info(f"剩余延迟时间: {remaining} 秒")
+                INFO.logger.info(f"剩余延迟时间: {remaining} 秒")
                 time.sleep(1)
 
-            logger.info("延迟结束，开始执行用例")
+            INFO.logger.info("延迟结束，开始执行用例")
         elif delay_seconds == 0:
-            logger.info(f"用例 '{case_title}' 无延迟，立即执行")
+            INFO.logger.info(f"用例 '{case_title}' 无延迟，立即执行")
         elif delay_seconds is None:
             # 无延迟配置，正常执行
             pass
         else:
-            logger.warning(f"无效的延迟时间: {delay_seconds} 秒，将立即执行用例")
+            WARNING.logger.warning(f"无效的延迟时间: {delay_seconds} 秒，将立即执行用例")

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time   : 2026/4/1 14:19
+# @Time   : 2026/3/26 14:40
 # @Author : alin
 import time
-from utils.helper_tools.log_control import logger
+from utils.logging_tools.log_control import INFO, WARNING, ERROR
 
 
 class RetryControl:
@@ -28,12 +28,12 @@ class RetryControl:
         
         for attempt in range(1, max_attempts + 1):
             try:
-                logger.info(f"🔄 第 {attempt} 次执行用例: {case_info.title}")
+                INFO.logger.info(f"第 {attempt} 次执行用例: {case_info.title}")
                 
                 result = case_execution_func(case_info)
                 
                 if attempt > 1:
-                    logger.info(f"✅ 重跑成功！第 {attempt} 次执行通过")
+                    INFO.logger.info(f"重跑成功！第 {attempt} 次执行通过")
                 
                 return result
                 
@@ -41,19 +41,19 @@ class RetryControl:
                 if attempt < max_attempts:
                     # 计算下次重跑间隔（指数退避策略）
                     wait_time = 2 ** (attempt - 1)  # 1, 2, 4, 8...秒
-                    logger.warning(f"⚠️ 第 {attempt} 次执行失败，{wait_time} 秒后重跑...")
-                    logger.warning(f"   失败原因: {str(e)}")
+                    WARNING.logger.warning(f"第 {attempt} 次执行失败，{wait_time} 秒后重跑...")
+                    WARNING.logger.warning(f"   失败原因: {str(e)}")
                     
                     # 显示重跑倒计时
                     for remaining in range(wait_time, 0, -1):
-                        logger.info(f"⏳ 重跑倒计时: {remaining} 秒")
+                        INFO.logger.info(f"重跑倒计时: {remaining} 秒")
                         time.sleep(1)
                     
-                    logger.info(f"🚀 开始第 {attempt + 1} 次重跑")
+                    INFO.logger.info(f"开始第 {attempt + 1} 次重跑")
                 else:
                     # 最后一次尝试也失败
-                    logger.error(f"❌ 用例执行失败，已达到最大重跑次数 {retry_count}")
-                    logger.error(f"   最终失败原因: {str(e)}")
+                    ERROR.logger.error(f"用例执行失败，已达到最大重跑次数 {retry_count}")
+                    ERROR.logger.error(f"最终失败原因: {str(e)}")
                     raise
 
     @staticmethod

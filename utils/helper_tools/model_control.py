@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time   : 2026/3/25 19:00
+# @Time   : 2026/3/26 14:40
 # @Author : alin
 from dataclasses import dataclass
-from utils.helper_tools.log_control import logger
+from utils.logging_tools.log_control import ERROR
 
 
 @dataclass
@@ -30,5 +30,5 @@ def verify_yaml(case_info: dict):
         new_case = CaseInfo(**case_info)
         return new_case
     except Exception:
-        logger.error("测试用例的YAML不符合框架的规范")
+        ERROR.logger.error("测试用例的YAML不符合框架的规范")
         raise Exception("测试用例的YAML不符合框架的规范！")

@@ -5,9 +5,9 @@
 import os
 import yaml
 from pathlib import Path
-from utils.helper_tools.log_control import logger
+from utils.logging_tools.log_control import INFO
 from utils.helper_tools.ddt_control import read_testcase
-from utils.helper_tools.common_utils import CommonUtils
+from utils.file_tools.yaml_control import YamlControl
 
 
 class BusinessFlowControl:
@@ -22,15 +22,15 @@ class BusinessFlowControl:
         """
         try:
             # 使用通用工具类读取YAML文件
-            flow_config = CommonUtils.read_yaml_file(yaml_path)
+            flow_config = YamlControl(yaml_path).read_yaml_data()
 
             if not flow_config:
-                logger.error(f"业务流程用例文件为空: {yaml_path}")
+                INFO.logger.error(f"业务流程用例文件为空: {yaml_path}")
                 return []
 
             # 验证业务流程用例格式
             if not BusinessFlowControl._validate_flow_format(flow_config):
-                logger.error(f"业务流程用例格式错误: {yaml_path}")
+                INFO.logger.error(f"业务流程用例格式错误: {yaml_path}")
                 return []
 
             scene_name = flow_config.get("scene_name", "")
@@ -38,27 +38,27 @@ class BusinessFlowControl:
             cases = flow_config.get("cases", [])
             config = flow_config.get("config", {})
 
-            logger.info(f"📋 开始加载业务流程: {scene_name}")
-            logger.info(f"📝 流程描述: {desc}")
+            INFO.logger.info(f"开始加载业务流程: {scene_name}")
+            INFO.logger.info(f"流程描述: {desc}")
 
             # 构建流程用例列表
             flow_cases = BusinessFlowControl._build_flow_cases(yaml_path, cases)
 
             if flow_cases:
-                logger.info(f"🎯 业务流程加载完成，共 {len(flow_cases)} 个步骤")
+                INFO.logger.info(f"业务流程加载完成，共 {len(flow_cases)} 个步骤")
                 return [flow_cases]  # 包装成流程用例格式
             else:
-                logger.error(f"❌ 业务流程用例加载失败: {yaml_path}")
+                INFO.logger.error(f"业务流程用例加载失败: {yaml_path}")
                 return []
 
         except FileNotFoundError:
-            logger.error(f"业务流程用例文件不存在: {yaml_path}")
+            INFO.logger.error(f"业务流程用例文件不存在: {yaml_path}")
             return []
         except yaml.YAMLError as e:
-            logger.error(f"业务流程用例文件格式错误: {yaml_path}, 错误: {str(e)}")
+            INFO.logger.error(f"业务流程用例文件格式错误: {yaml_path}, 错误: {str(e)}")
             return []
         except Exception as e:
-            logger.error(f"读取业务流程用例异常: {yaml_path}, 错误: {str(e)}")
+            INFO.logger.error(f"读取业务流程用例异常: {yaml_path}, 错误: {str(e)}")
             return []
 
     @staticmethod
@@ -69,7 +69,7 @@ class BusinessFlowControl:
         :return: True/False
         """
         try:
-            content = CommonUtils.read_yaml_file(yaml_path)
+            content = YamlControl(yaml_path).read_yaml_data()
 
             if isinstance(content, dict):
                 return "scene_name" in content and "cases" in content
@@ -111,7 +111,7 @@ class BusinessFlowControl:
             case_desc = case_config.get("desc", "")
 
             if not case_file:
-                logger.error(f"第 {i + 1} 个用例配置缺少case字段")
+                INFO.logger.error(f"第 {i + 1} 个用例配置缺少case字段")
                 continue
 
             # 构建用例文件完整路径（支持子目录查找）
@@ -119,7 +119,7 @@ class BusinessFlowControl:
             case_path = CommonUtils.find_file_in_directory(case_dir, case_file)
 
             if not case_path or not case_path.exists():
-                logger.error(f"用例文件不存在: {case_file}，在目录 {case_dir} 及其子目录中未找到")
+                INFO.logger.error(f"用例文件不存在: {case_file}，在目录 {case_dir} 及其子目录中未找到")
                 continue
 
             # 读取单个用例文件
@@ -133,9 +133,9 @@ class BusinessFlowControl:
                     # 单接口用例，包装成列表
                     flow_cases.append(case_list[0])
 
-                logger.info(f"✅ 加载第 {i + 1} 步: {case_desc} ({case_file})")
-                logger.info(f"   文件路径: {case_path}")
+                INFO.logger.info(f"加载第 {i + 1} 步: {case_desc} ({case_file})")
+                INFO.logger.info(f"文件路径: {case_path}")
             else:
-                logger.error(f"❌ 加载第 {i + 1} 步失败: {case_file}")
+                INFO.logger.error(f"加载第 {i + 1} 步失败: {case_file}")
 
         return flow_cases

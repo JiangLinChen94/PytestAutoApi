@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time   : 2026/3/27 9:26
+# @Time   : 2026/3/26 14:40
 # @Author : alin
-
 import pymysql
-from utils.helper_tools.log_control import logger
+from utils.logging_tools.log_control import INFO, ERROR
 from utils.file_tools.config_control import config
 
 
@@ -27,10 +26,10 @@ class MysqlControl:
         """创建数据库连接（带异常捕获）"""
         try:
             conn = pymysql.connect(**self.db_conf)
-            logger.info("MySQL 连接成功")
+            INFO.logger.info("MySQL 连接成功")
             return conn
         except Exception as e:
-            logger.error(f"MySQL 连接失败：{str(e)}")
+            ERROR.logger.error(f"MySQL 连接失败：{str(e)}")
             raise
 
     def execute_sql(self, sql, args=None):
@@ -47,26 +46,26 @@ class MysqlControl:
             cs = conn.cursor()
 
             # 执行SQL
-            logger.info(f"执行SQL：{sql}")
+            INFO.logger.info(f"执行SQL：{sql}")
             rows = cs.execute(sql, args)
 
             # 查询语句 → 返回结果
             if sql.strip().upper().startswith("SELECT"):
                 result = cs.fetchone()  # 单条
                 # result = cs.fetchall() # 多条
-                logger.info(f"查询结果：{result}")
+                INFO.logger.info(f"查询结果：{result}")
                 return result
 
             # 增删改 → 提交事务
             else:
                 conn.commit()
-                logger.info(f"执行成功，受影响行数：{rows}")
+                INFO.logger.info(f"执行成功，受影响行数：{rows}")
                 return rows
 
         except Exception as e:
             if conn:
                 conn.rollback()  # 失败回滚
-            logger.error(f"SQL执行失败：{str(e)}")
+            ERROR.logger.error(f"SQL执行失败：{str(e)}")
             raise
 
         finally:
@@ -75,7 +74,7 @@ class MysqlControl:
                 cs.close()
             if conn:
                 conn.close()
-                logger.info("MySQL 连接已关闭")
+                INFO.logger.info("MySQL 连接已关闭")
 
 
 if __name__ == '__main__':

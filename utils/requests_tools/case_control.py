@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time   : 2026/3/26 15:10
 # @Author : alin
-from utils.helper_tools.log_control import logger
+from utils.logging_tools.log_control import INFO
 
 from utils.helper_tools.extract_control import ExtractControl
 from utils.helper_tools.model_control import CaseInfo
@@ -22,7 +22,7 @@ def _execute_single_case(case_info: CaseInfo):
     SkipControl.check_and_skip(case_info.skip, case_info)
     
     # 日志
-    logger.info(
+    INFO.logger.info(
         f"接口信息：{case_info.feature} >> {case_info.story} >> {case_info.title}"
     )
     

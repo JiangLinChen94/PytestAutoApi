@@ -1,0 +1,26 @@
+- feature: 账务中心-账户管理
+  story: 批量新增列表
+  title: '$ddt{title}'
+  request:
+    method: post
+    url: ${get_env()}gateway/std-account-client/std/account/importFilePage
+    params: null
+    json: {"belongBrand":"$ddt{belongBrand}","fileName":"$ddt{fileName}","createName":"$ddt{createName}","processingStatus":"$ddt{processingStatus}","fileType":"$ddt{fileType}","startCreateDate":"$ddt{startCreateDate}","endCreateDate":"$ddt{startCreateDate}","pageNum":1,"pageSize":50}
+    headers: { "Content-type": "application/json","Authorization": "Bearer ${read_extract(token)}" }
+  extract: null
+  validate:
+    equals:
+      断言状态为true: [ "True", "success" ]
+    contains:
+      断言返回内容包含预期值: [ "$ddt{assert_content}", "text" ]
+  parametrize:
+    - [ title,belongBrand,fileName,createName,processingStatus,fileType,startCreateDate,endCreateDate,assert_content ]
+    - [ "查询所有数据成功","","","","","'01'","","","importFileUrl" ]
+    - [ "根据品牌LSHM查询数据成功","LSHM","","","","'01'","","","零食很忙" ]
+#    - [ "根据品牌ZYM查询数据成功","","","","","'01'","","","赵一鸣" ]
+    - [ "根据文件名称搜索数据成功","","账务账户批量新增","","","'01'","","","账务账户批量新增.xlsx" ]
+    - [ "根据创建人搜索数据成功","","","唐信","","'01'","","","唐信" ]
+    - [ "根据处理结果-已处理搜索数据成功","","","","2","'01'","","","已处理" ]
+    - [ "根据文件类型-账户新增搜索数据成功","","","","","'01'","","","01" ]
+    - [ "根据文件类型-批量调账搜索数据成功","","","","","'02'","","","'02'" ]
+    - [ "根据操作时间搜索数据成功","","","","","'01'","2026-04-07","2026-04-07","2026-04-07 14:49:17" ]

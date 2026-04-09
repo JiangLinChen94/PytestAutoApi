@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time   : 2026/4/1 14:19
+# @Time   : 2026/3/26 14:40
 # @Author : alin
 import pytest
-from utils.helper_tools.log_control import logger
+from utils.logging_tools.log_control import INFO, WARNING
 
 
 class SkipControl:
@@ -19,10 +19,10 @@ class SkipControl:
         :param case_info: 用例信息
         """
         if skip_flag is True:
-            logger.warning(f"⏭️ 用例 '{case_info.title}' 被标记为跳过，跳过执行")
+            WARNING.logger.warning(f"用例 '{case_info.title}' 被标记为跳过，跳过执行")
             pytest.skip(f"用例 '{case_info.title}' 被标记为跳过")
         elif skip_flag is False:
-            logger.info(f"✅ 用例 '{case_info.title}' 正常执行")
+            INFO.logger.info(f"用例 '{case_info.title}' 正常执行")
         # skip_flag为None时，正常执行
 
     @staticmethod
@@ -32,7 +32,7 @@ class SkipControl:
         :param reason: 跳过原因
         :param case_info: 用例信息
         """
-        logger.warning(f"⏭️ 用例 '{case_info.title}' 被跳过，原因: {reason}")
+        WARNING.logger.warning(f"用例 '{case_info.title}' 被跳过，原因: {reason}")
         pytest.skip(f"用例 '{case_info.title}' 被跳过，原因: {reason}")
 
     @staticmethod

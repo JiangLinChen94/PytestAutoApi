@@ -5,6 +5,7 @@
 import os
 import yaml.scanner
 from configs import setting
+from utils.logging_tools.log_control import ERROR
 
 
 class YamlControl:
@@ -20,11 +21,18 @@ class YamlControl:
         :return: 根据yaml格式返回列表嵌套字典或字典
         """
         # 判断文件是否存在
-        if not os.path.exists(self.file_dir):
-            raise FileNotFoundError("文件路径不存在")
-        with open(self.file_dir, 'r', encoding='utf-8') as data:
-            res = yaml.safe_load(data)
-        return res
+        try:
+            with open(self.file_dir, encoding="utf-8") as f:
+                return yaml.safe_load(f)
+        except FileNotFoundError:
+            ERROR.logger.error(f"YAML文件不存在: {self.file_dir}")
+            return None
+        except yaml.YAMLError as e:
+            ERROR.logger.error(f"YAML文件格式错误: {self.file_dir}, 错误: {str(e)}")
+            return None
+        except Exception as e:
+            ERROR.logger.error(f"读取YAML文件异常: {self.file_dir}, 错误: {str(e)}")
+            return None
 
     def __read_yaml_by_key(self, key: str) -> list or dict:
         """
@@ -39,15 +47,17 @@ class YamlControl:
 
     def write_yaml_data(self, data: dict):
         """
-        简单的yaml文件追加写入，最好写入空yaml文件；
-        备注1.请不要键相同；2.如果写入的文件有内容，yaml文件内容可能会有格式错误
-        :param data: 写入的数据
-        :return: None
+        写入YAML文件，统一错误处理
+        :param data: 要写入的数据
+        :return: 是否成功
         """
-        if not isinstance(data, dict):
-            raise TypeError("传入的数据不是字典")
-        with open(self.file_dir, "a+", encoding="utf-8") as f:
-            yaml.safe_dump(data=data, stream=f, allow_unicode=True)
+        try:
+            with open(self.file_dir, "a", encoding="utf-8") as f:
+                yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)
+            return True
+        except Exception as e:
+            ERROR.logger.error(f"写入YAML文件失败: {self.file_dir}, 错误: {str(e)}")
+            return False
 
     def clear_yaml_data(self):
         """
@@ -151,10 +161,9 @@ if __name__ == '__main__':
     # YamlControl.write_extract({"token": "1231231231"})
     # YamlControl.clear_extract()
     result = YamlControl.read_extract_by_key("token")
-    print(result)    # extract_yaml_path = "D:\Script\PytestAutoApi\extract.yaml"
+    print(result)  # extract_yaml_path = "D:\Script\PytestAutoApi\extract.yaml"
     # extract_yaml_control = YamlControl(extract_yaml_path)
     # print(extract_yaml_control.read_yaml_data())
     # extract_yaml_control.write_yaml_data({"name": "value"})
     # extract_yaml_control.update_yaml_data("name", "update_value")
     # print(extract_yaml_control.read_yaml_data())
-

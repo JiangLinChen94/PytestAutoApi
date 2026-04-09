@@ -3,6 +3,7 @@
 # @Time   : 2026/3/26 14:50
 # @Author : alin
 import time
+import os
 from utils.file_tools.yaml_control import YamlControl
 from utils.file_tools.config_control import config
 
@@ -33,6 +34,15 @@ class HelperControl:
         """
         return config.get("env", "base_url")
 
+    @staticmethod
+    def get_project_root():
+        """
+        获取项目根目录绝对路径
+        :return: 项目根目录路径
+        """
+        return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 if __name__ == '__main__':
     print(HelperControl().read_extract('token'))
+    print(HelperControl().get_project_root())

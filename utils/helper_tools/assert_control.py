@@ -5,7 +5,7 @@
 import json
 import copy
 import yaml
-from utils.helper_tools.log_control import logger
+from utils.logging_tools.log_control import ERROR
 from utils.helper_tools.common_utils import CommonUtils
 from utils.mysql_tools.mysql_control import MysqlControl
 
@@ -48,7 +48,7 @@ class AssertControl:
             # 断言失败时已经记录了详细日志，这里只重新抛出异常
             raise
         except Exception as e:
-            logger.error(f"断言执行异常：{str(e)}")
+            ERROR.logger.error(f"断言执行异常：{str(e)}")
             raise
 
     def _get_actual_value(self, resp, expr):
@@ -150,38 +150,38 @@ class AssertControl:
         :param resp: 响应对象
         :param request_info: 请求信息字典
         """
-        logger.error(f"   断言失败：{msg}")
+        ERROR.logger.error(f"   断言失败：{msg}")
         
         # 记录请求信息（如果提供了）
         if request_info:
-            logger.error(f"   接口请求信息:")
+            ERROR.logger.error(f"   接口请求信息:")
             for key, value in request_info.items():
                 if key == "headers" and isinstance(value, dict):
                     # 过滤敏感头信息
                     filtered_headers = CommonUtils.filter_sensitive_data(value, "headers")
-                    logger.error(f"      {key}: {filtered_headers}")
+                    ERROR.logger.error(f"      {key}: {filtered_headers}")
                 elif key == "json" and isinstance(value, dict):
                     # 过滤敏感JSON字段
                     filtered_json = CommonUtils.filter_sensitive_data(value, "json")
-                    logger.error(f"      {key}: {filtered_json}")
+                    ERROR.logger.error(f"      {key}: {filtered_json}")
                 else:
-                    logger.error(f"      {key}: {value}")
+                    ERROR.logger.error(f"      {key}: {value}")
         
-        logger.error(f"   预期值表达式: {actual_expr}")
-        logger.error(f"   原始预期值: {repr(expect_value)}")
-        logger.error(f"   字符串预期值: {repr(expect_str)}")
-        logger.error(f"   实际获取值: {repr(actual_str)}")
+        ERROR.logger.error(f"   预期值表达式: {actual_expr}")
+        ERROR.logger.error(f"   原始预期值: {repr(expect_value)}")
+        ERROR.logger.error(f"   字符串预期值: {repr(expect_str)}")
+        ERROR.logger.error(f"   实际获取值: {repr(actual_str)}")
 
         # 记录完整的响应内容
         try:
             if hasattr(resp, 'text'):
-                logger.error(f"   接口完整响应:")
-                logger.error(f"   {resp.text}")
+                ERROR.logger.error(f"   接口完整响应:")
+                ERROR.logger.error(f"   {resp.text}")
             elif hasattr(resp, 'json') and isinstance(resp.json, dict):
-                logger.error(f"   接口JSON响应:")
-                logger.error(f"   {json.dumps(resp.json, ensure_ascii=False, indent=2)}")
+                ERROR.logger.error(f"   接口JSON响应:")
+                ERROR.logger.error(f"   {json.dumps(resp.json, ensure_ascii=False, indent=2)}")
         except Exception as e:
-            logger.error(f"   响应内容记录失败: {str(e)}")
+            ERROR.logger.error(f"   响应内容记录失败: {str(e)}")
 
     def _get_db_value(self, sql):
         """

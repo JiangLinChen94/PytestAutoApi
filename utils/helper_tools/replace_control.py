@@ -27,6 +27,10 @@ class ReplaceControl:
 
             # 拼接旧的值
             old_value = "${" + func[0] + "(" + func[1] + ")}"
+            # 替换时确保路径字符串正确处理
+            if isinstance(new_value, str) and "\\" in new_value:
+                # 对于包含反斜杠的路径，使用原始字符串表示
+                new_value = new_value.replace("\\", "/")  # 将反斜杠转换为正斜杠
             # 替换
             yaml_str = yaml_str.replace(old_value, str(new_value))
         return yaml_str

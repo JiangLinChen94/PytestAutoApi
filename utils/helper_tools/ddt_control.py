@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time   : 2026/3/31 16:24
+# @Time   : 2026/3/26 14:40
 # @Author : alin
 import yaml
 from datetime import date, datetime
-from utils.helper_tools.log_control import logger
+from utils.logging_tools.log_control import ERROR
 
 
 def read_testcase(yaml_path):
@@ -39,19 +39,19 @@ def read_testcase(yaml_path):
                     if result:  # 只有当ddts返回有效结果时才使用
                         return result
                     else:
-                        logger.error("数据驱动用例生成失败，使用普通单接口用例")
+                        ERROR.logger.error("数据驱动用例生成失败，使用普通单接口用例")
 
         # 普通单接口用例
         return case_list
 
     except FileNotFoundError:
-        logger.error(f"测试用例文件不存在: {yaml_path}")
+        ERROR.logger.error(f"测试用例文件不存在: {yaml_path}")
         return []
     except yaml.YAMLError as e:
-        logger.error(f"YAML文件解析错误: {str(e)}")
+        ERROR.logger.error(f"YAML文件解析错误: {str(e)}")
         return []
     except Exception as e:
-        logger.error(f"读取测试用例时发生未知错误: {str(e)}")
+        ERROR.logger.error(f"读取测试用例时发生未知错误: {str(e)}")
         return []
 
 
@@ -70,23 +70,23 @@ def ddts(case_info: dict):
 
         # 检查parametrize是否为有效列表
         if not isinstance(data_list, list) or len(data_list) < 2:
-            logger.error("parametrize配置无效：必须是列表且至少包含2行（参数名+数据）")
+            ERROR.logger.error("parametrize配置无效：必须是列表且至少包含2行（参数名+数据）")
             return []
 
         # 检查每行列数是否一致
         args = data_list[0]
         if not isinstance(args, list):
-            logger.error("参数名行必须是列表格式")
+            ERROR.logger.error("参数名行必须是列表格式")
             return []
 
         arg_len = len(args)
 
         for i, row in enumerate(data_list[1:], 1):
             if not isinstance(row, list):
-                logger.error(f"第{i + 1}行数据格式错误：必须是列表")
+                ERROR.logger.error(f"第{i + 1}行数据格式错误：必须是列表")
                 return []
             if len(row) != arg_len:
-                logger.error(f"第{i + 1}行数据数量({len(row)})与参数名数量({arg_len})不匹配")
+                ERROR.logger.error(f"第{i + 1}行数据数量({len(row)})与参数名数量({arg_len})不匹配")
                 return []
 
         # 转字符串方便批量替换
@@ -118,22 +118,44 @@ def ddts(case_info: dict):
                 new_case = yaml.safe_load(tmp_str)
                 new_case.pop("parametrize", None)
 
+                # 在数据驱动阶段就进行变量替换
+                new_case = _replace_variables_in_case(new_case)
+                
                 # 确保所有日期字段都是字符串格式
                 new_case = _ensure_string_dates(new_case)
                 new_list.append(new_case)
 
             except yaml.YAMLError as e:
-                logger.error(f"第{i}组数据YAML解析失败: {str(e)}")
+                ERROR.logger.error(f"第{i}组数据YAML解析失败: {str(e)}")
                 continue
             except Exception as e:
-                logger.error(f"第{i}组数据处理失败: {str(e)}")
+                ERROR.logger.error(f"第{i}组数据处理失败: {str(e)}")
                 continue
 
         return new_list
 
     except Exception as e:
-        logger.error(f"数据驱动处理过程中发生未知错误: {str(e)}")
+        ERROR.logger.error(f"数据驱动处理过程中发生未知错误: {str(e)}")
         return []
+
+
+def _replace_variables_in_case(case_data):
+    """
+    在数据驱动阶段替换用例中的变量和函数调用
+    """
+    from utils.helper_tools.replace_control import ReplaceControl
+    
+    # 将用例数据转换为字符串进行替换
+    case_str = yaml.dump(case_data, allow_unicode=True)
+    
+    # 执行变量替换（先替换变量）
+    case_str = ReplaceControl().variable_replace(case_str)
+    
+    # 执行函数替换（再执行函数调用）
+    case_str = ReplaceControl().function_replace(case_str)
+    
+    # 转换回字典
+    return yaml.safe_load(case_str)
 
 
 def _ensure_string_dates(data):

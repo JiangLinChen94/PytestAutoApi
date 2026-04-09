@@ -1,0 +1,26 @@
+- feature: 账务中心-账户管理
+  story: 账户列表
+  title: 批量新增导入成功
+  skip: false
+  request:
+    method: post
+    url: ${get_env()}gateway/std-account-client/std/account/importFile
+    params: null
+    json: null
+    files:
+      file: "${get_project_root()}/files/file/账务账户批量新增.xlsx"
+    headers:
+      Authorization: "Bearer ${read_extract(token)}"
+  extract: null
+  validate:
+    equals:
+      断言状态为true: [ "True", "success" ]
+  parametrize: null
+
+
+
+
+
+
+
+
