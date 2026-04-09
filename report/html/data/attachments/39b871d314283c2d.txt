@@ -1,1 +1,0 @@
-INFO     D:\Script\PytestAutoApi\logs\info-2026-04-09.log:case_control.py:25 接口信息：账务中心-账户管理 >> 批量新增列表 >> 根据创建人搜索数据成功

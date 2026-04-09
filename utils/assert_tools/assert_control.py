@@ -1,29 +1,57 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time   : 2026/3/27 9:21
+# @Time   : 2026/4/9 11:30
 # @Author : alin
+"""
+断言控制器
+统一管理多种断言类型的执行和错误处理
+"""
+
 import json
 import copy
 import yaml
-from utils.logging_tools.log_control import ERROR
-from utils.common_tools.common_control import filter_sensitive_data
-from utils.mysql_tools.mysql_control import MysqlControl
+from typing import Any, Dict, Tuple, Optional
+from utils.logging_tools.log_control import ERROR, INFO
+from .assert_type import AssertType
+from .assert_function import AssertFunction
+
+# 断言类型映射到函数
+ASSERT_FUNCTIONS = {
+    AssertType.equals: AssertFunction.equals,
+    AssertType.less_than: AssertFunction.less_than,
+    AssertType.less_than_or_equals: AssertFunction.less_than_or_equals,
+    AssertType.greater_than: AssertFunction.greater_than,
+    AssertType.greater_than_or_equals: AssertFunction.greater_than_or_equals,
+    AssertType.not_equals: AssertFunction.not_equals,
+    AssertType.string_equals: AssertFunction.string_equals,
+    AssertType.length_equals: AssertFunction.length_equals,
+    AssertType.length_greater_than: AssertFunction.length_greater_than,
+    AssertType.length_greater_than_or_equals: AssertFunction.length_greater_than_or_equals,
+    AssertType.length_less_than: AssertFunction.length_less_than,
+    AssertType.length_less_than_or_equals: AssertFunction.length_less_than_or_equals,
+    AssertType.contains: AssertFunction.contains,
+    AssertType.contained_by: AssertFunction.contained_by,
+    AssertType.startswith: AssertFunction.startswith,
+    AssertType.endswith: AssertFunction.endswith,
+}
 
 
 class AssertControl:
-    """统一断言封装"""
+    """统一断言控制器"""
 
     def __init__(self):
         """初始化断言控制器"""
-        self.mysql = MysqlControl()
+        pass
 
-    def assert_all_case(self, resp, assert_type, assert_rules, request_info=None):
+    def assert_all_case(self, resp, assert_type: str, assert_rules: Dict[str, Tuple[Any, str]],
+                        request_info: Optional[Dict] = None) -> bool:
         """
         统一断言入口
         :param resp: requests响应对象
-        :param assert_type: 断言类型 equals / contains / not_contains / db_equals / db_contains / db_not_contains
+        :param assert_type: 断言类型字符串
         :param assert_rules: 断言规则 {提示信息: [预期值, 实际取值路径]}
-        :param request_info: 请求信息字典，包含url, method, headers, params, json等
+        :param request_info: 请求信息字典
+        :return: 断言是否通过
         """
         try:
             # 深拷贝响应对象，避免修改原始数据
@@ -37,21 +65,63 @@ class AssertControl:
             setattr(res, "json", json_data)
 
             # 遍历所有断言规则并执行断言
+            all_passed = True
             for msg, (expect_value, actual_expr) in assert_rules.items():
-                actual_value = self._get_actual_value(res, actual_expr)
-                actual_str = self._to_string(actual_value)
-                expect_str = self._to_string(expect_value)
+                if not self._execute_single_assert(res, assert_type, expect_value, actual_expr, msg, request_info):
+                    all_passed = False
 
-                self._do_assert(assert_type, expect_str, actual_str, msg, expect_value, actual_expr, res, request_info)
+            return all_passed
 
-        except AssertionError as e:
+        except AssertionError:
             # 断言失败时已经记录了详细日志，这里只重新抛出异常
             raise
         except Exception as e:
             ERROR.logger.error(f"断言执行异常：{str(e)}")
             raise
 
-    def _get_actual_value(self, resp, expr):
+    def _execute_single_assert(self, resp, assert_type: str, expect_value: Any,
+                               actual_expr: str, msg: str, request_info: Optional[Dict] = None) -> bool:
+        """
+        执行单个断言
+        :param resp: 响应对象
+        :param assert_type: 断言类型
+        :param expect_value: 预期值
+        :param actual_expr: 实际值表达式
+        :param msg: 断言消息
+        :param request_info: 请求信息
+        :return: 断言是否通过
+        """
+        try:
+            # 获取实际值
+            actual_value = self._get_actual_value(resp, actual_expr)
+
+            # 执行断言
+            assert_func = self._get_assert_function(assert_type)
+            if assert_func:
+                result = assert_func(actual_value, expect_value)
+                if result:
+                    INFO.logger.info(f"断言通过：{msg}")
+                    return True
+                else:
+                    self._log_assert_failure(msg, expect_value, actual_expr, actual_value, resp, request_info)
+                    return False
+            else:
+                ERROR.logger.error(f"不支持的断言类型：{assert_type}")
+                return False
+
+        except Exception as e:
+            ERROR.logger.error(f"断言执行异常：{msg}, 错误：{str(e)}")
+            return False
+
+    def _get_assert_function(self, assert_type: str):
+        """获取断言函数"""
+        try:
+            assert_enum = AssertType(assert_type)
+            return ASSERT_FUNCTIONS.get(assert_enum)
+        except ValueError:
+            return None
+
+    def _get_actual_value(self, resp, expr: str) -> Any:
         """
         根据表达式获取实际值
         :param resp: 响应对象
@@ -81,117 +151,96 @@ class AssertControl:
         except Exception:
             return expr
 
-    def _to_string(self, value):
-        """
-        将任意类型转换为字符串，用于统一比较
-        :param value: 待转换的值
-        :return: 字符串格式结果
-        """
-        if isinstance(value, dict):
-            return yaml.safe_dump(value, sort_keys=False, allow_unicode=True)
-        return str(value).strip()
-
-    def _do_assert(self, assert_type, expect_str, actual_str, msg, expect_value, actual_expr, resp, request_info=None):
-        """
-        根据断言类型执行断言逻辑
-        :param assert_type: 断言类型
-        :param expect_str: 预期字符串
-        :param actual_str: 实际字符串
-        :param msg: 断言失败提示信息
-        :param expect_value: 原始预期值
-        :param actual_expr: 实际值表达式
-        :param resp: 响应对象
-        :param request_info: 请求信息字典
-        """
-        if assert_type == "equals":
-            if expect_str != actual_str:
-                self._log_assert_failure(msg, expect_value, actual_expr, expect_str, actual_str, resp, request_info)
-            assert expect_str == actual_str, msg
-
-        elif assert_type == "contains":
-            if expect_str not in actual_str:
-                self._log_assert_failure(msg, expect_value, actual_expr, expect_str, actual_str, resp, request_info)
-            assert expect_str in actual_str, msg
-
-        elif assert_type == "not_contains":
-            if expect_str in actual_str:
-                self._log_assert_failure(msg, expect_value, actual_expr, expect_str, actual_str, resp, request_info)
-            assert expect_str not in actual_str, msg
-
-        elif assert_type == "db_equals":
-            db_result = self._get_db_value(expect_str)
-            if db_result != actual_str:
-                self._log_assert_failure(msg, expect_str, actual_expr, db_result, actual_str, resp, request_info)
-            assert db_result == actual_str, msg
-
-        elif assert_type == "db_contains":
-            db_result = self._get_db_value(expect_str)
-            if db_result not in actual_str:
-                self._log_assert_failure(msg, expect_str, actual_expr, db_result, actual_str, resp, request_info)
-            assert db_result in actual_str, msg
-
-        elif assert_type == "db_not_contains":
-            db_result = self._get_db_value(expect_str)
-            if db_result in actual_str:
-                self._log_assert_failure(msg, expect_str, actual_expr, db_result, actual_str, resp, request_info)
-            assert db_result not in actual_str, msg
-
-        else:
-            raise ValueError(f"不支持的断言类型：{assert_type}")
-
-    def _log_assert_failure(self, msg, expect_value, actual_expr, expect_str, actual_str, resp, request_info=None):
+    def _log_assert_failure(self, msg: str, expect_value: Any, actual_expr: str,
+                            actual_value: Any, resp, request_info: Optional[Dict] = None):
         """
         记录断言失败的详细日志
         :param msg: 断言失败提示信息
         :param expect_value: 原始预期值
         :param actual_expr: 实际值表达式
-        :param expect_str: 预期字符串
-        :param actual_str: 实际字符串
+        :param actual_value: 实际值
         :param resp: 响应对象
         :param request_info: 请求信息字典
         """
-        ERROR.logger.error(f"   断言失败：{msg}")
+        ERROR.logger.error(f"断言失败：{msg}")
 
         # 记录请求信息（如果提供了）
         if request_info:
-            ERROR.logger.error(f"   接口请求信息:")
+            ERROR.logger.error(f"接口请求信息:")
             for key, value in request_info.items():
                 if key == "headers" and isinstance(value, dict):
                     # 过滤敏感头信息
-                    filtered_headers = filter_sensitive_data(value, "headers")
+                    filtered_headers = self._filter_sensitive_data(value, "headers")
                     ERROR.logger.error(f"      {key}: {filtered_headers}")
                 elif key == "json" and isinstance(value, dict):
                     # 过滤敏感JSON字段
-                    filtered_json = filter_sensitive_data(value, "json")
+                    filtered_json = self._filter_sensitive_data(value, "json")
                     ERROR.logger.error(f"      {key}: {filtered_json}")
                 else:
                     ERROR.logger.error(f"      {key}: {value}")
 
-        ERROR.logger.error(f"   预期值表达式: {actual_expr}")
-        ERROR.logger.error(f"   原始预期值: {repr(expect_value)}")
-        ERROR.logger.error(f"   字符串预期值: {repr(expect_str)}")
-        ERROR.logger.error(f"   实际获取值: {repr(actual_str)}")
+        ERROR.logger.error(f"预期值表达式: {actual_expr}")
+        ERROR.logger.error(f"原始预期值: {repr(expect_value)}")
+        ERROR.logger.error(f"实际获取值: {repr(actual_value)}")
 
         # 记录完整的响应内容
         try:
             if hasattr(resp, 'text'):
-                ERROR.logger.error(f"   接口完整响应:")
-                ERROR.logger.error(f"   {resp.text}")
+                ERROR.logger.error(f"接口完整响应:")
+                ERROR.logger.error(f"{resp.text}")
             elif hasattr(resp, 'json') and isinstance(resp.json, dict):
-                ERROR.logger.error(f"   接口JSON响应:")
-                ERROR.logger.error(f"   {json.dumps(resp.json, ensure_ascii=False, indent=2)}")
+                ERROR.logger.error(f"接口JSON响应:")
+                ERROR.logger.error(f"{json.dumps(resp.json, ensure_ascii=False, indent=2)}")
         except Exception as e:
             ERROR.logger.error(f"   响应内容记录失败: {str(e)}")
 
-    def _get_db_value(self, sql):
-        """
-        执行SQL并返回第一个结果值
-        :param sql: 待执行的SQL语句
-        :return: 查询结果的第一个值
-        """
-        try:
-            result = self.mysql.execute_sql(sql)
-            return str(result[0]) if result else ""
-        except Exception as e:
-            logger.error(f"数据库查询失败：{sql}，错误：{str(e)}")
-            return ""
+    def _filter_sensitive_data(self, data: Dict, data_type: str) -> Dict:
+        """过滤敏感数据"""
+        filtered_data = data.copy()
+
+        if data_type == "headers":
+            sensitive_keys = ['authorization', 'token', 'password', 'secret']
+            for key in sensitive_keys:
+                if key.lower() in [k.lower() for k in filtered_data.keys()]:
+                    for original_key in filtered_data.keys():
+                        if original_key.lower() == key.lower():
+                            filtered_data[original_key] = "***FILTERED***"
+
+        elif data_type == "json":
+            sensitive_keys = ['password', 'token', 'secret', 'authorization']
+            for key in sensitive_keys:
+                if key in filtered_data:
+                    filtered_data[key] = "***FILTERED***"
+
+        return filtered_data
+
+
+# 便捷断言函数
+def assert_equals(actual: Any, expected: Any, msg: str = "") -> bool:
+    """等于断言便捷函数"""
+    return AssertFunction.equals(actual, expected)
+
+
+def assert_less_than(actual: Any, expected: Any, msg: str = "") -> bool:
+    """小于断言便捷函数"""
+    return AssertFunction.less_than(actual, expected)
+
+
+def assert_greater_than(actual: Any, expected: Any, msg: str = "") -> bool:
+    """大于断言便捷函数"""
+    return AssertFunction.greater_than(actual, expected)
+
+
+def assert_contains(actual: Any, expected: Any, msg: str = "") -> bool:
+    """包含断言便捷函数"""
+    return AssertFunction.contains(actual, expected)
+
+
+def assert_startswith(actual: Any, expected: Any, msg: str = "") -> bool:
+    """开头匹配断言便捷函数"""
+    return AssertFunction.startswith(actual, expected)
+
+
+def assert_endswith(actual: Any, expected: Any, msg: str = "") -> bool:
+    """结尾匹配断言便捷函数"""
+    return AssertFunction.endswith(actual, expected)
