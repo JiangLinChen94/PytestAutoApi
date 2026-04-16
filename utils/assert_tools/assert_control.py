@@ -152,6 +152,21 @@ class AssertControl:
                 result = jsonpath.jsonpath(dict(json_data), expr)
                 return result[0] if result else None
 
+            # 如果表达式是点分隔的嵌套字段路径（如 "data.issueSubsidyAmount"）
+            if "." in expr and not expr.startswith("$"):
+                json_data = getattr(resp, "json", {})
+                if isinstance(json_data, dict):
+                    # 逐级获取嵌套字段值
+                    keys = expr.split(".")
+                    current_value = json_data
+                    for key in keys:
+                        if isinstance(current_value, dict) and key in current_value:
+                            current_value = current_value[key]
+                        else:
+                            # 如果路径不存在，返回None
+                            return None
+                    return current_value
+
             # 如果表达式是JSON字段名，从JSON数据中提取
             json_data = getattr(resp, "json", {})
             if isinstance(json_data, dict) and expr in json_data:

@@ -1,0 +1,18 @@
+-  feature: 账务中心-资金记录
+   story: 资金记录-补贴记录-统计数据列表查询
+   title: '$ddt{title}'
+   request:
+     method: post
+     url: ${get_env()}gateway/std-account-client/std/subsidy/statistics
+     params: null
+     json: {"belongBrand":null,"subsidyTypeCode":null,"financeSubsidyTypeCode":null}
+     headers: { "Content-type": "application/json","Authorization": "Bearer ${read_extract(token)}" }
+   extract: null
+   validate:
+     equals:
+       断言状态为true: [ "True", "success" ]
+     gt:
+       累计发放金额大于0: [ 0, "data.issueSubsidyAmount" ]
+       累计使用总金额大于0: [ 0, "data.useSubsidyAmount" ]
+       当前剩余总金额大于0: [ 0, "data.remainingSubsidyAmount" ]
+   parametrize: null
