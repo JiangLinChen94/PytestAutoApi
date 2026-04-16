@@ -43,8 +43,8 @@ class AssertControl:
         """初始化断言控制器"""
         pass
 
-    def assert_all_case(self, resp, assert_type: str, assert_rules: Dict[str, Tuple[Any, str]],
-                        request_info: Optional[Dict] = None) -> bool:
+    def assert_all_case(self, resp, assert_type: str, assert_rules: Dict[str, Tuple[Any, str]], 
+                       request_info: Optional[Dict] = None) -> bool:
         """
         统一断言入口
         :param resp: requests响应对象
@@ -56,22 +56,30 @@ class AssertControl:
         try:
             # 深拷贝响应对象，避免修改原始数据
             res = copy.deepcopy(resp)
-
+            
             # 处理响应JSON数据
             try:
                 json_data = res.json()
             except Exception:
                 json_data = {"msg": "response is not json data"}
             setattr(res, "json", json_data)
-
+            
             # 遍历所有断言规则并执行断言
             all_passed = True
             for msg, (expect_value, actual_expr) in assert_rules.items():
-                if not self._execute_single_assert(res, assert_type, expect_value, actual_expr, msg, request_info):
+                try:
+                    if not self._execute_single_assert(res, assert_type, expect_value, actual_expr, msg, request_info):
+                        all_passed = False
+                except AssertionError:
+                    # 单个断言失败时，记录失败但继续执行其他断言
                     all_passed = False
-
+            
+            # 如果有任何一个断言失败，抛出异常
+            if not all_passed:
+                raise AssertionError("断言失败，请查看详细日志")
+            
             return all_passed
-
+            
         except AssertionError:
             # 断言失败时已经记录了详细日志，这里只重新抛出异常
             raise
@@ -104,14 +112,18 @@ class AssertControl:
                     return True
                 else:
                     self._log_assert_failure(msg, expect_value, actual_expr, actual_value, resp, request_info)
-                    return False
+                    # 断言失败时抛出 AssertionError，让 pytest 能够捕获并标记测试失败
+                    raise AssertionError(f"断言失败：{msg}")
             else:
                 ERROR.logger.error(f"不支持的断言类型：{assert_type}")
-                return False
+                raise AssertionError(f"不支持的断言类型：{assert_type}")
 
+        except AssertionError:
+            # 重新抛出 AssertionError
+            raise
         except Exception as e:
             ERROR.logger.error(f"断言执行异常：{msg}, 错误：{str(e)}")
-            return False
+            raise AssertionError(f"断言执行异常：{msg}, 错误：{str(e)}")
 
     def _get_assert_function(self, assert_type: str):
         """获取断言函数"""
