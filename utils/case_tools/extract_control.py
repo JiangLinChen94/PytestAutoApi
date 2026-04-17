@@ -24,7 +24,7 @@ class ExtractControl:
     # print(res.encoding)  # 返回编码格式
     # print(res.elapsed)  # 耗时
     @staticmethod
-    def extract(var_name, resp, attr, expr: str, index: int):
+    def extract(var_name, resp, attr, expr: str, index: int, case_file: str = None):
         """
         截取参数写入extract.yaml文件
         :param var_name: 要保存的变量名，比如 token
@@ -32,6 +32,7 @@ class ExtractControl:
         :param attr: 从响应的哪里取？比如 json / text
         :param expr: 提取表达式：jsonpath 或 正则
         :param index: 取第几个结果（下标）
+        :param case_file: 用例文件名，用于分组存储
         :return:
         """
         # 1.获取response的值。深拷贝一份resp，
@@ -54,8 +55,16 @@ class ExtractControl:
             var_value = extract_list[index]
         else:
             var_value = "not extract data"
-        # 6.把数据写入到extract.yaml里面
-        YamlControl.write_extract({var_name: var_value})
+        # 6.把数据写入到extract.yaml里面，按用例文件名分组
+        if case_file:
+            # 从完整路径中提取文件名（不含扩展名）
+            import os
+            file_name = os.path.splitext(os.path.basename(case_file))[0]
+            extract_data = {file_name: {var_name: var_value}}
+        else:
+            extract_data = {var_name: var_value}
+        
+        YamlControl.write_extract(extract_data)
 
     # 读取extract.yaml里面的数据并使用(请求之前)
     @staticmethod

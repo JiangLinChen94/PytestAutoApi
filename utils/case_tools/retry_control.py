@@ -12,17 +12,19 @@ class RetryControl:
     """
 
     @staticmethod
-    def execute_with_retry(case_execution_func, case_info, retry_count: int):
+    def execute_with_retry(case_execution_func, case_info, retry_count: int, *args, **kwargs):
         """
         带重跑功能的用例执行
         :param case_execution_func: 用例执行函数
         :param case_info: 用例信息
         :param retry_count: 重跑次数
+        :param args: 额外位置参数
+        :param kwargs: 额外关键字参数
         :return: 执行结果
         """
         if retry_count is None or retry_count <= 0:
             # 无重跑配置，直接执行
-            return case_execution_func(case_info)
+            return case_execution_func(case_info, *args, **kwargs)
 
         max_attempts = retry_count + 1  # 总尝试次数 = 重跑次数 + 初始执行
         
@@ -30,7 +32,7 @@ class RetryControl:
             try:
                 INFO.logger.info(f"第 {attempt} 次执行用例: {case_info.title}")
                 
-                result = case_execution_func(case_info)
+                result = case_execution_func(case_info, *args, **kwargs)
                 
                 if attempt > 1:
                     INFO.logger.info(f"重跑成功！第 {attempt} 次执行通过")

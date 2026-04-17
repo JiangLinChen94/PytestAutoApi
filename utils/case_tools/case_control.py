@@ -13,10 +13,11 @@ from utils.requests_tools.request_control import RequestsControl
 from utils.assert_tools.assert_control import AssertControl
 
 
-def _execute_single_case(case_info: CaseInfo):
+def _execute_single_case(case_info: CaseInfo, case_file: str = None):
     """
     执行单个用例（不包含重跑逻辑）
     :param case_info: 用例信息
+    :param case_file: 用例文件名，用于extract分组存储
     """
     # 检查是否跳过用例
     SkipControl.check_and_skip(case_info.skip, case_info)
@@ -36,7 +37,7 @@ def _execute_single_case(case_info: CaseInfo):
     # 请求之后：提取值
     if case_info.extract:
         for ex_key, ex_value in case_info.extract.items():
-            ExtractControl().extract(ex_key, resp, *ex_value)
+            ExtractControl().extract(ex_key, resp, *ex_value, case_file)
     
     # 断言（传递请求信息用于失败时打印）
     if case_info.validate:
@@ -46,10 +47,11 @@ def _execute_single_case(case_info: CaseInfo):
     return resp
 
 
-def use_case_execution(case_info: CaseInfo):
+def use_case_execution(case_info: CaseInfo, case_file: str = None):
     """
     用例执行入口，包含重跑逻辑
     :param case_info: 用例信息
+    :param case_file: 用例文件名，用于extract分组存储
     """
     # 使用重跑控制执行用例
-    return RetryControl.execute_with_retry(_execute_single_case, case_info, case_info.retry)
+    return RetryControl.execute_with_retry(_execute_single_case, case_info, case_info.retry, case_file)

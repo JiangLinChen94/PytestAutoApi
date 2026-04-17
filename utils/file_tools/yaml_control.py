@@ -45,14 +45,15 @@ class YamlControl:
         res = YamlControl(self.file_dir).read_yaml_data()
         return res[key]
 
-    def write_yaml_data(self, data: dict):
+    def write_yaml_data(self, data: dict, mode: str = "a"):
         """
         写入YAML文件，统一错误处理
         :param data: 要写入的数据
+        :param mode: 写入模式，"a"为追加，"w"为覆盖
         :return: 是否成功
         """
         try:
-            with open(self.file_dir, "a", encoding="utf-8") as f:
+            with open(self.file_dir, mode, encoding="utf-8") as f:
                 yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)
             return True
         except Exception as e:
@@ -117,7 +118,6 @@ class YamlControl:
             # 获取PytestAutoApi路径
             base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
             extract_path = os.path.join(base_dir, file_path)
-            print(extract_path)
             return YamlControl(extract_path).__read_yaml_by_key(key)
         except Exception as e:
             print(f"读取 extract.yaml 文件失败: {str(e)}")
@@ -126,16 +126,37 @@ class YamlControl:
     @staticmethod
     def write_extract(data: dict, file_path=setting.extract_file_name):
         """
-        向 extract.yaml 文件中写入数据
+        向 extract.yaml 文件中写入数据，支持按用例文件名分组
         :param file_path: 文件路径，默认PytestAutoApi\extract.yaml路径
-        :param data: 传入字典格式路径
+        :param data: 传入字典格式路径，支持 {用例文件名: {变量名: 值}} 格式
         :return:
         """
         try:
             # 获取PytestAutoApi路径
             base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
             extract_path = os.path.join(base_dir, file_path)
-            YamlControl(extract_path).write_yaml_data(data)
+            
+            # 读取现有的extract数据
+            existing_data = YamlControl.read_extract(file_path)
+            if existing_data is None:
+                existing_data = {}
+            
+            # 合并数据，支持用例文件名分组
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    # 如果是用例文件名分组格式 {用例文件名: {变量名: 值}}
+                    # 这里key是用例文件名，value是{变量名: 值}字典
+                    if key not in existing_data:
+                        existing_data[key] = {}
+                    # value应该是{变量名: 值}格式的字典
+                    if isinstance(value, dict):
+                        existing_data[key].update(value)
+                else:
+                    # 如果是传统格式 {变量名: 值}
+                    existing_data[key] = value
+            
+            # 写入合并后的数据
+            YamlControl(extract_path).write_yaml_data(existing_data, mode="w")
         except Exception as e:
             print(f"写入 extract.yaml 文件失败: {str(e)}")
             return None

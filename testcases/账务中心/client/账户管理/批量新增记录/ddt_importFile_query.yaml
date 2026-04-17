@@ -6,7 +6,7 @@
     url: ${get_env()}gateway/std-account-client/std/account/importFilePage
     params: null
     json: {"belongBrand":"$ddt{belongBrand}","fileName":"$ddt{fileName}","createName":"$ddt{createName}","processingStatus":"$ddt{processingStatus}","fileType":"$ddt{fileType}","startCreateDate":"$ddt{startCreateDate}","endCreateDate":"$ddt{startCreateDate}","pageNum":1,"pageSize":50}
-    headers: { "Content-type": "application/json","Authorization": "Bearer ${read_extract(token)}" }
+    headers: { "Content-type": "application/json","Authorization": "Bearer ${get_extract_value(login,token)}" }
   extract: null
   validate:
     equals:

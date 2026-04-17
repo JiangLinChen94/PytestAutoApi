@@ -14,4 +14,4 @@
       断言状态码为200: [ "200", "respCode" ]
     contains:
       断言响应内容包括token: [ "token", "text" ]
-      断言响应内容包括token的值: [ "${read_extract(token)}", "text" ]
+      断言响应内容包括token的值: [ "${login.token}", "text" ]

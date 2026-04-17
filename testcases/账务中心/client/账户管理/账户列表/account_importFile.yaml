@@ -10,7 +10,7 @@
     files:
       file: "${get_project_root()}/files/file/账务账户批量新增.xlsx"
     headers:
-      Authorization: "Bearer ${read_extract(token)}"
+      Authorization: "Bearer ${get_extract_value(login,token)}"
   extract: null
   validate:
     equals:

@@ -7,7 +7,7 @@
      params: null
      json: { "belongBrand": '$ddt{belongBrand}', "accBaseCode": '$ddt{accBaseCode}', "ownerSourceId": '$ddt{ownerSourceId}', "baseBizCode": '$ddt{baseBizCode}', "ownerType": '$ddt{ownerType}',
              "status": '$ddt{status}', "pageNum": 1, "pageSize": 10 }
-     headers: { "Content-type": "application/json","Authorization": "Bearer ${read_extract(token)}" }
+     headers: { "Content-type": "application/json","Authorization": "Bearer ${get_extract_value(login,token)}" }
    extract: null
    validate:
      equals:
@@ -18,8 +18,8 @@
      - [ title,belongBrand,accBaseCode,ownerSourceId,baseBizCode,ownerType,status,assert_accBaseCode ]
      - [ "根据品牌LSHM查询数据成功","LSHM","","","","","","LSHM" ]
 #     - [ "根据品牌ZYM查询数据成功","ZYM","","","","","","ZYM" ]
-     - [ "根据账户名称查询数据成功","","${accBaseCode}","","","","","${accBaseCode}" ]
-     - [ "根据支付侧主商编查询数据成功","","","${ownerSourceId}","","","","${ownerSourceId}" ]
-     - [ "根据主体代码查询数据成功","","","","${baseBizCode}","","","${baseBizCode}" ]
-     - [ "根据主体代码查询数据成功","","","","","${ownerType}","","${ownerType}" ]
-     - [ "根据状态查询数据成功","","","","","","${status}","${status}" ]
+     - [ "根据账户名称查询数据成功","","${account_list_query.accBaseCode}","","","","","${account_list_query.accBaseCode}" ]
+     - [ "根据支付侧主商编查询数据成功","","","${account_list_query.ownerSourceId}","","","","${account_list_query.ownerSourceId}" ]
+     - [ "根据主体代码查询数据成功","","","","${account_list_query.baseBizCode}","","","${account_list_query.baseBizCode}" ]
+     - [ "根据主体代码查询数据成功","","","","","${account_list_query.ownerType}","","${account_list_query.ownerType}" ]
+     - [ "根据状态查询数据成功","","","","","","${account_list_query.status}","${account_list_query.status}" ]

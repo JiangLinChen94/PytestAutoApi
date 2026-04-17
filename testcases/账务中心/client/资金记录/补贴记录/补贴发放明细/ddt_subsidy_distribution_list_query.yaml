@@ -1,0 +1,21 @@
+-  feature: 账务中心-资金记录
+   story: 资金记录-补贴记录-补贴发放明细
+   title: '$ddt{title}'
+   request:
+     method: post
+     url: ${get_env()}gateway/std-account-client/std/subsidy/issueDetailPage
+     params: null
+     json: {"belongBrand":"$ddt{belongBrand}","subsidyTypeCode":"$ddt{subsidyTypeCode}","financeSubsidyTypeCode":"$ddt{financeSubsidyTypeCode}","pageNum":1,"pageSize":50}
+     headers: { "Content-type": "application/json","Authorization": "Bearer ${get_extract_value(login,token)}" }
+   extract: null
+   validate:
+     equals:
+       断言状态为true: [ "True", "success" ]
+     contains:
+       响应内容包含的数据: [ "$ddt{assert_accBaseCode}", "text" ]
+   parametrize:
+     - [ title,belongBrand,subsidyTypeCode,financeSubsidyTypeCode,assert_accBaseCode ]
+     - ['根据品牌LSHM搜索数据成功','LSHM','','','LSHM']
+     - ['根据品牌业务补贴类型搜索数据成功','','S0001','','线下转账']
+     - ['根据品牌财务补贴类型搜索数据成功','','','S0001','线下转账']
+     - ['组合搜索数据成功','LSHM','S0001','S0001','线下转账']

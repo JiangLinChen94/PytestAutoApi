@@ -1,0 +1,6 @@
+INFO     D:\Script\PytestAutoApi\logs\info-2026-04-17.log:case_control.py:26 接口信息：账务中心-资金记录 >> 资金记录-补贴记录-补贴发放明细 >> 根据品牌财务补贴类型搜索数据成功
+INFO     D:\Script\PytestAutoApi\logs\info-2026-04-17.log:request_control.py:42 请求成功: post https://acc-test.hnlshm.com/gateway/std-account-client/std/subsidy/statisticsList
+INFO     D:\Script\PytestAutoApi\logs\info-2026-04-17.log:request_control.py:43 响应状态码: 200
+INFO     D:\Script\PytestAutoApi\logs\info-2026-04-17.log:request_control.py:44 响应时间: 165ms
+INFO     D:\Script\PytestAutoApi\logs\info-2026-04-17.log:assert_control.py:111 断言通过：响应内容包含的数据
+INFO     D:\Script\PytestAutoApi\logs\info-2026-04-17.log:assert_control.py:111 断言通过：断言状态为true

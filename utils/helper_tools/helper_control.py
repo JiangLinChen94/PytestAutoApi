@@ -10,13 +10,23 @@ from utils.file_tools.config_control import config
 
 class HelperControl:
     @staticmethod
-    def read_extract(key):
+    def get_extract_value(case_name, key=None):
         """
-        根据key值读取extract关联文件中的value值
+        读取extract关联文件中的value值
+        支持两种调用方式：
+        1. get_extract_value("token") - 传统方式，直接获取变量
+        2. get_extract_value("login", "token") - 按用例文件名和变量名获取
+        
+        :param case_name: 用例文件名
         :param key: 需要读取的键
-        :return:
+        :return: 对应的值
         """
-        return YamlControl.read_extract_by_key(key)
+
+        extract_data = YamlControl.read_extract()
+        if case_name in extract_data and isinstance(extract_data[case_name], dict):
+            return extract_data[case_name].get(key)
+        else:
+            return None
 
     @staticmethod
     def get_random_number():
@@ -44,5 +54,4 @@ class HelperControl:
 
 
 if __name__ == '__main__':
-    print(HelperControl().read_extract('token'))
-    print(HelperControl().get_project_root())
+    print(HelperControl().get_extract_value('login','token'))

@@ -71,7 +71,7 @@ def create_testcase(yaml_path):
             allure.dynamic.title(new_case_info.title)
             
             # 用例的标准化处理
-            use_case_execution(new_case_info)
+            use_case_execution(new_case_info, str(yaml_path))
 
     return func
 

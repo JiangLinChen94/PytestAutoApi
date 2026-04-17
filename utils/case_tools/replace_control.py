@@ -38,20 +38,36 @@ class ReplaceControl:
     @staticmethod
     def variable_replace(yaml_str: str):
         """
-        替换 yaml 中的 ${token} 格式变量
-        例如：$token → 真实token值
+        替换 yaml 中的变量
+        支持两种格式：
+        1. ${token} - 传统格式，直接获取变量
+        2. ${login.token} - 新格式，按用例文件名和变量名获取
         """
         # 读取全局变量文件 extract.yaml
         extract_data = YamlControl.read_extract()
 
-        # 正则匹配：$变量名（如 $token, $orderId, $userId）
-        regexp = r"\$\{(\w+)\}"
-        var_list = re.findall(regexp, yaml_str)
+        # 正则匹配：${用例文件名.变量名} 格式（如 ${login.token}, ${account_list_query.belongBrand}）
+        new_regexp = r"\$\{(\w+)\.(\w+)\}"
+        new_var_list = re.findall(new_regexp, yaml_str)
 
-        # 循环替换所有 $变量
-        for var_name in var_list:
-            # 从全局变量中取值
-            real_value = extract_data.get(var_name, f"$${var_name}_NOT_FOUND")
+        # 循环替换所有 ${用例文件名.变量名} 格式
+        for case_name, var_name in new_var_list:
+            # 从全局变量中按用例文件名分组取值
+            if case_name in extract_data and isinstance(extract_data[case_name], dict):
+                real_value = extract_data[case_name].get(var_name, f"${{{case_name}.{var_name}_NOT_FOUND}}")
+            else:
+                real_value = f"${{{case_name}.{var_name}_NOT_FOUND}}"
+
+            yaml_str = yaml_str.replace(f"${{{case_name}.{var_name}}}", str(real_value))
+
+        # 正则匹配：${变量名} 格式（如 ${token}, ${orderId}, ${userId}）
+        old_regexp = r"\$\{(\w+)\}"
+        old_var_list = re.findall(old_regexp, yaml_str)
+
+        # 循环替换所有 ${变量名} 格式
+        for var_name in old_var_list:
+            # 从全局变量中直接取值
+            real_value = extract_data.get(var_name, f"${{{var_name}_NOT_FOUND}}")
 
             yaml_str = yaml_str.replace(f"${{{var_name}}}", str(real_value))
         return yaml_str
@@ -64,7 +80,7 @@ class ReplaceControl:
             # 输入是对象 CaseInfo → 转字符串
             yaml_str = yaml.safe_dump(asdict(data), sort_keys=False, allow_unicode=True)
 
-        # 执行替换
+        # 执行替换：先处理函数调用，再处理变量替换
         yaml_str = self.function_replace(yaml_str)
         yaml_str = self.variable_replace(yaml_str)
 
