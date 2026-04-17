@@ -12,9 +12,9 @@
      equals:
        断言状态为true: [ "True", "success" ]
      contains:
-       响应内容包含的数据: [ "$ddt{assert_accBaseCode}", "text" ]
+       响应内容包含的数据: [ "$ddt{assert_content}", "text" ]
    parametrize:
-     - [ title,belongBrand,subsidyTypeCode,financeSubsidyTypeCode,assert_accBaseCode ]
+     - [ title,belongBrand,subsidyTypeCode,financeSubsidyTypeCode,assert_content ]
      - ['根据品牌LSHM搜索数据成功','LSHM','','','LSHM']
      - ['根据品牌业务补贴类型搜索数据成功','','S0001','','线下转账']
      - ['根据品牌财务补贴类型搜索数据成功','','','S0001','线下转账']

@@ -1,9 +1,18 @@
 login:
-  token: eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2luZm8iOiJhZG1pbjo2MjQ0MzE0MzU6MTc3NjM5MTk4MjI0NiIsImlzX3Rva2VuX2NhY2hlZCI6dHJ1ZSwiZXhwIjoxNzc2NDM1MTgyfQ.TfikBv4D0CI6o34UVnkNvUCOhfpW3n7Qjhd5milebOjr8jnWlQr-KGldPMuE0ZDfIMQJqYCpqbuTcwHdPsUj5A
+  token: eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2luZm8iOiJhZG1pbjo2MjQ0MzE0MzU6MTc3NjQwNjY0OTU4OCIsImlzX3Rva2VuX2NhY2hlZCI6dHJ1ZSwiZXhwIjoxNzc2NDQ5ODQ5fQ.5QeLJTTfonBjm8b1AU7OLpnpxLaiwL5W-XaB86KmbA3WmvWP8Ujh-bl5Iaw_9xE7fm-p18Rjl-IoavWB9jL_yg
 account_list_query:
   belongBrand: LSHM
-  accBaseCode: B17763892039290939675
-  ownerSourceId: M2044950653470228480
-  baseBizCode: 101A7687
+  accBaseCode: B17764043567774187994
+  ownerSourceId: M2045014209200898048
+  baseBizCode: 105S0174
   ownerType: '1001'
   status: 1
+distribution_details_list_query:
+  belongBrand: 零食很忙
+  warehouseName: '1000'
+  companyName: 湖南鸣鸣很忙商业连锁股份有限公司
+  subsidyType: 开业活动补贴
+  financeSubsidyTypeName: 开业活动补贴
+  storeName: B17678708508554646294
+  businessTime: '2026-04-14 15:00:01'
+  createAt: '2026-04-14 15:00:03'

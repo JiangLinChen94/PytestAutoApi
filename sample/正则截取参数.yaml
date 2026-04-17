@@ -1,0 +1,24 @@
+-  feature: 账务中心-资金记录
+   story: 资金记录-补贴记录-补贴发放明细
+   title: 补贴发放明细搜索全部数据成功
+   request:
+     method: post
+     url: ${get_env()}gateway/std-account-client/std/subsidy/issueDetailPage
+     params: null
+     json: {"belongBrand":null,"storeCode":null,"warehouseBaseCode":null,"warehouseCode":null,"subsidyTypeCode":null,"financeSubsidyTypeCode":null,"payNo":null,"pageNum":1,"pageSize":50}
+     headers: { "Content-type": "application/json","Authorization": "Bearer ${get_extract_value(login,token)}" }
+   extract:
+    belongBrand: [ text, '"belongBrand"\s*:\s*"([^"]+)"', 0 ]
+    warehouseName: [ text, '"warehouseName"\s*:\s*"([^"]+)/', 0 ]
+    companyName: [ text, '"companyName"\s*:\s*"([^"]+)/', 0 ]
+    subsidyType: [ text, '"subsidyType"\s*:\s*"([^"]+)"', 0 ]
+    financeSubsidyTypeName: [ text, '"financeSubsidyTypeName"\s*:\s*"([^"]+)"', 0 ]
+    storeName: [ text, '"storeName"\s*:\s*"([^"]+)/', 0 ]
+    businessTime: [ text, '"businessTime"\s*:\s*"([^"]+)"', 0 ]
+    createAt: [ text, '"createAt"\s*:\s*"([^"]+)"', 0 ]
+   validate:
+     equals:
+       断言状态为true: [ "True", "success" ]
+     contains:
+       响应内容包含的数据: [ "${distribution_details_list_query.storeName}", "text" ]
+   parametrize:

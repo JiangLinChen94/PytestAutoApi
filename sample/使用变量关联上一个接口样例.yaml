@@ -7,6 +7,6 @@
     params: null
     json: { "belongBrand": '', "accBaseCode": '', "ownerSourceId": '', "baseBizCode": '', "ownerType": '',
             "status": '', "pageNum": 1, "pageSize": 10 }
-    headers: { "Content-type": "application/json","Authorization": "Bearer ${token}" }
+    headers: { "Content-type": "application/json","Authorization": "Bearer ${login.token}" }
   extract: null
   validate: null

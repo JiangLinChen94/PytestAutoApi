@@ -48,13 +48,26 @@ class ExtractControl:
         # 4.判断提取的方式是正则还是jsonpath
         if expr.startswith("$"):
             extract_list = jsonpath.jsonpath(dict(data), expr)
+            # 5.通过下标取值
+            if extract_list:
+                var_value = extract_list[index]
+            else:
+                var_value = "not extract data"
         else:
+            # 正则表达式处理
             extract_list = re.findall(expr, data)
-        # 5.通过下标取值
-        if extract_list:
-            var_value = extract_list[index]
-        else:
-            var_value = "not extract data"
+            # 5.通过下标取值
+            if extract_list:
+                # 如果正则表达式有多个匹配组，re.findall返回的是元组列表
+                # 需要根据index获取对应的匹配组
+                if isinstance(extract_list[0], tuple):
+                    # 多个匹配组的情况
+                    var_value = extract_list[0][index] if index < len(extract_list[0]) else "not extract data"
+                else:
+                    # 单个匹配组的情况
+                    var_value = extract_list[index]
+            else:
+                var_value = "not extract data"
         # 6.把数据写入到extract.yaml里面，按用例文件名分组
         if case_file:
             # 从完整路径中提取文件名（不含扩展名）

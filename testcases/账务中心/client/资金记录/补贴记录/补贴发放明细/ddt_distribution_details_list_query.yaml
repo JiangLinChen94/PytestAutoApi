@@ -1,0 +1,20 @@
+-  feature: 账务中心-资金记录
+   story: 资金记录-补贴记录-补贴发放明细
+   title: '$ddt{title}'
+   request:
+     method: post
+     url: ${get_env()}gateway/std-account-client/std/subsidy/issueDetailPage
+     params: null
+     json: {"belongBrand":"$ddt{belongBrand}","storeCode":"$ddt{storeCode}","warehouseBaseCode":"$ddt{warehouseBaseCode}","warehouseCode":"$ddt{warehouseCode}","subsidyTypeCode":"$ddt{subsidyTypeCode}","financeSubsidyTypeCode":"$ddt{financeSubsidyTypeCode}","payNo":"$ddt{payNo}","startCreateTime":"$ddt{startCreateTime}","endCreateTime":"$ddt{endCreateTime}","startBusinessTime":"$ddt{startBusinessTime}","endBusinessTime":"$ddt{endBusinessTime}","pageNum":1,"pageSize":10}
+     headers: { "Content-type": "application/json","Authorization": "Bearer ${get_extract_value(login,token)}" }
+   extract: null
+   validate:
+     equals:
+       断言状态为true: [ "True", "success" ]
+     contains:
+       响应内容包含的数据: [ "$ddt{assert_content}", "text" ]
+   parametrize:
+     - [ title,belongBrand,storeCode,warehouseBaseCode,warehouseCode,subsidyTypeCode,financeSubsidyTypeCode,payNo,startCreateTime,endCreateTime,startBusinessTime,endBusinessTime,assert_content]
+     - ["根据品牌LSHM搜索数据成功","LSHM","","","","","","","","","","","零食很忙"]
+     - ["根据品牌ZYM搜索数据成功","ZYM","","","","","","","","","","","赵一鸣"]
+    
